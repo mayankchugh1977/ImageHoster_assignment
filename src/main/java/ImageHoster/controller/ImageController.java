@@ -73,16 +73,24 @@ public class ImageController {
     @RequestMapping(value = "/images/upload", method = RequestMethod.POST)
     public String createImage(@RequestParam("file") MultipartFile file, @RequestParam("tags") String tags, Image newImage, HttpSession session) throws IOException {
 
-        User user = (User) session.getAttribute("loggeduser");
-        newImage.setUser(user);
-        String uploadedImageData = convertUploadedFileToBase64(file);
-        newImage.setImageFile(uploadedImageData);
+        Image image = imageService.getImageByTitle(newImage.getTitle());
 
-        List<Tag> imageTags = findOrCreateTags(tags);
-        newImage.setTags(imageTags);
-        newImage.setDate(new Date());
-        imageService.uploadImage(newImage);
-        return "redirect:/images";
+        if(image != null) {
+
+            return "redirect:/images/" + newImage.getTitle();
+        }else {
+
+            User user = (User) session.getAttribute("loggeduser");
+            newImage.setUser(user);
+            String uploadedImageData = convertUploadedFileToBase64(file);
+            newImage.setImageFile(uploadedImageData);
+
+            List<Tag> imageTags = findOrCreateTags(tags);
+            newImage.setTags(imageTags);
+            newImage.setDate(new Date());
+            imageService.uploadImage(newImage);
+            return "redirect:/images";
+        }
     }
 
     //This controller method is called when the request pattern is of type 'editImage'
